@@ -34,8 +34,8 @@ RUN curl -LO "http://graphics.stanford.edu/pub/3Dscanrep/bunny.tar.gz" \
 RUN python3 ply-to-pts.py wrappingcycles_output/bun_zipper.ply /wrappingcycles/bun_zipper_point_cloud.txt \
 && python3 ply-to-pts.py wrappingcycles_output/bun_zipper_res4.ply /wrappingcycles/bun_zipper_res4_point_cloud.txt
 
-RUN python3 persistentfeature-to-ply.py bun_zipper_point_cloud.txt 2 3 wrappingcycles_output/bun_zipper \
-&& python3 persistentfeature-to-ply.py bun_zipper_res4_point_cloud.txt 2 3 wrappingcycles_output/bun_zipper_res4
+RUN python3 persistentfeature-to-ply.py bun_zipper_point_cloud.txt 3 3 wrappingcycles_output/bun_zipper \
+&& python3 persistentfeature-to-ply.py bun_zipper_res4_point_cloud.txt 3 3 wrappingcycles_output/bun_zipper_res4
 
 RUN rm bun_zipper_point_cloud.txt bun_zipper_res4_point_cloud.txt
 
@@ -49,7 +49,7 @@ RUN curl -LO "http://graphics.stanford.edu/pub/3Dscanrep/dragon/dragon_recon.tar
 
 RUN python3 ply-to-pts.py wrappingcycles_output/dragon_vrip.ply /wrappingcycles/dragon_vrip_point_cloud.txt 
 
-RUN python3 persistentfeature-to-ply.py dragon_vrip_point_cloud.txt 2 3 wrappingcycles_output/dragon_vrip
+RUN python3 persistentfeature-to-ply.py dragon_vrip_point_cloud.txt 3 3 wrappingcycles_output/dragon_vrip
 
 RUN rm dragon_vrip_point_cloud.txt
 
@@ -63,7 +63,7 @@ RUN curl -LO "http://graphics.stanford.edu/pub/3Dscanrep/happy/happy_recon.tar.g
 
 RUN python3 ply-to-pts.py wrappingcycles_output/happy_vrip.ply /wrappingcycles/happy_vrip_point_cloud.txt 
 
-RUN python3 persistentfeature-to-ply.py happy_vrip_point_cloud.txt 2 3 wrappingcycles_output/happy_vrip
+RUN python3 persistentfeature-to-ply.py happy_vrip_point_cloud.txt 3 3 wrappingcycles_output/happy_vrip
 
 RUN rm happy_vrip_point_cloud.txt
 
