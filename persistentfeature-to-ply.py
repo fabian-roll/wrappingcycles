@@ -15,7 +15,7 @@ coefficient_field = sys.argv[2]
 number_features = int(sys.argv[3]);
 output = sys.argv[4]
 delaunay=os.path.join(script_directory,"delaunay_3d_filtration")
-ripser=os.path.join(script_directory,"ripser")
+infiltrator=os.path.join(script_directory,"infiltrator")
 
 ### create augmented_boundaries
 with NamedTemporaryFile(suffix=".txt") as temp_boundaries:
@@ -23,7 +23,7 @@ with NamedTemporaryFile(suffix=".txt") as temp_boundaries:
         proc = subprocess.Popen(delaunay+str(" ")+point_cloud+str(" ")+temp_filtration.name,shell=True)
         proc.wait()
         # ratio=1.06
-        proc = subprocess.Popen(ripser+str(" ")+temp_filtration.name+str(" ")+temp_boundaries.name+" --modulus "+ coefficient_field,shell=True)
+        proc = subprocess.Popen(infiltrator+str(" ")+temp_filtration.name+str(" ")+temp_boundaries.name+" --modulus "+ coefficient_field,shell=True)
         proc.wait()
         augmented_boundaries=pd.read_csv(temp_boundaries.name,sep=";",names=["column","triangle1","triangle2","triangle3","value","oriented1","oriented2","oriented3"],header=None)
 

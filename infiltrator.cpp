@@ -1,10 +1,10 @@
 /*
 
- Ripser: a lean C++ code for computation of Vietoris-Rips persistence barcodes
+ Infiltrator: a lean C++ code for computation of simplicial persistence barcodes
 
  MIT License
 
- Copyright (c) 2015–2019 Ulrich Bauer
+ Copyright (c) 2015–2021 Ulrich Bauer
 
  Permission is hereby granted, free of charge, to any person obtaining a copy
  of this software and associated documentation files (the "Software"), to deal
@@ -80,7 +80,7 @@ std::ostream& operator<<(std::ostream& stream, const __int128_t& i) {
 std::istream& operator>>(std::istream& stream, __int128_t& i) {
 	size_t s;
 	stream >> s;
-	i = (index_t)(s);
+	i = (__int128_t)(s);
 	return stream;
 }
 
@@ -90,10 +90,12 @@ static const std::chrono::milliseconds time_step(40);
 
 static const std::string clear_line("\r\033[K");
 
+#ifdef USE_COEFFICIENTS
 static const size_t num_coefficient_bits = 8;
 
 static const index_t max_simplex_index =
     (index_t(1) << (8 * sizeof(index_t) - 1 - num_coefficient_bits)) - 1;
+#endif
 
 void check_overflow(index_t i) {
 	if
@@ -143,10 +145,6 @@ std::vector<coefficient_t> multiplicative_inverse_vector(const coefficient_t m) 
 	// 0 = inverse(m % a) * (m / a) + inverse(a)  (mod m)
 	for (coefficient_t a = 2; a < m; ++a) inverse[a] = m - (inverse[m % a] * (m / a)) % m;
 	return inverse;
-}
-
-coefficient_t normalize(const coefficient_t n, const coefficient_t modulus) {
-	return n > modulus / 2 ? n - modulus : n;
 }
 
 #ifdef USE_COEFFICIENTS
@@ -404,7 +402,7 @@ index_t get_max(index_t top, const index_t bottom, const Predicate pred) {
 	return top;
 }
 
-class ripser {
+class infiltrator {
 	std::vector<std::unordered_map<index_t, value_t>> filtration;
     index_t n, dim_max;
 	value_t threshold;
@@ -430,7 +428,7 @@ class ripser {
 	typedef hash_map<entry_t, size_t, entry_hash, equal_index> entry_hash_map;
 
 public:
-    ripser(std::vector<std::unordered_map<index_t, value_t>>&& _filtration, index_t _n, index_t _dim_max, value_t _threshold,
+    infiltrator(std::vector<std::unordered_map<index_t, value_t>>&& _filtration, index_t _n, index_t _dim_max, value_t _threshold,
 	       float _ratio, coefficient_t _modulus)
 	    : filtration(std::move(_filtration)), n(_n), dim_max(_dim_max), threshold(_threshold),
 	      ratio(_ratio), modulus(_modulus), binomial_coeff(n, dim_max + 2),
@@ -469,11 +467,11 @@ public:
 		const diameter_entry_t simplex;
 		const coefficient_t modulus;
 		const binomial_coeff_table& binomial_coeff;
-		const ripser& parent;
+		const infiltrator& parent;
 		
 	public:
 		simplex_boundary_enumerator(const diameter_entry_t _simplex, index_t _dim,
-									const ripser& _parent)
+									const infiltrator& _parent)
 		: idx_below(get_index(_simplex)), idx_above(0), v(_parent.n - 1), k(_dim + 1),
 		face_dim(_dim - 1), vertices(_dim + 1),  simplex(_simplex), modulus(_parent.modulus),
 		binomial_coeff(_parent.binomial_coeff), parent(_parent) {
@@ -536,16 +534,7 @@ public:
 					std::cout << " ["
 					<< std::max(filtration[0].find(vertices_of_edge[0])->second,
 								filtration[0].find(vertices_of_edge[1])->second)
-					<< "," << get_diameter(e) << "):  "
-					<< "{[" << u << "]"
-#ifdef USE_COEFFICIENTS
-					<< (modulus != 2 ? ":1" : "")
-#endif
-					<< ", [" << v << "]"
-#ifdef USE_COEFFICIENTS
-					<< (modulus != 2 ? ":-1" : "")
-#endif
-					<< "}" << std::endl;
+					<< "," << get_diameter(e) << ")" << std::endl;
 #endif
 				dset.link(u, v);
 			} else
@@ -555,11 +544,9 @@ public:
 
 #ifdef PRINT_PERSISTENCE_PAIRS
 		for (index_t i = 0; i < n; ++i)
-			if (dset.find(i) == i) std::cout << " [0, ):  {[" << i << "]"
-#ifdef USE_COEFFICIENTS
-				<< ":1"
-#endif
-				<< "}" << std::endl;
+            if (dset.find(i) == i) {
+                std::cout << " [" << filtration[0].find(i)->second << ", )" << std::endl;
+            }
 #endif
     }
 
@@ -693,9 +680,6 @@ public:
 #ifdef INDICATE_PROGRESS
 		std::chrono::steady_clock::time_point next = std::chrono::steady_clock::now() + time_step;
 #endif
-
-
-
 		for (size_t index_column_to_reduce = 0; index_column_to_reduce < columns_to_reduce.size();
 		     ++index_column_to_reduce) {
 
@@ -726,10 +710,10 @@ public:
 						entry_t other_pivot = pair->first;
 						index_t index_column_to_add = pair->second;
 						coefficient_t factor =
-						modulus - get_coefficient(pivot) *
-						multiplicative_inverse[get_coefficient(other_pivot)] %
-						modulus;
-						
+						    modulus - get_coefficient(pivot) *
+						                  multiplicative_inverse[get_coefficient(other_pivot)] %
+						                  modulus;
+
 						add_coboundary(reduction_matrix, columns_to_reduce, index_column_to_add,
 									   factor, dim, working_reduction_column, working_coboundary);
 						
@@ -813,7 +797,7 @@ public:
 	}
 };
 
-std::vector<diameter_index_t> ripser::get_edges() {
+std::vector<diameter_index_t> infiltrator::get_edges() {
 	std::vector<diameter_index_t> edges;
 	for (auto entry: filtration[1]) {
 		index_t index = entry.first;
@@ -823,13 +807,13 @@ std::vector<diameter_index_t> ripser::get_edges() {
 	return edges;
 }
 
-void ripser::assemble_columns_to_reduce(std::vector<diameter_index_t>& columns_to_reduce,
+void infiltrator::assemble_columns_to_reduce(std::vector<diameter_index_t>& columns_to_reduce,
                                         entry_hash_map& pivot_column_index,
                                         index_t dim) {
 	columns_to_reduce.clear();
 	
 #ifdef INDICATE_PROGRESS
-	std::cout << clear_line
+	std::cout << "\033[K"
 	<< "assembling " << filtration[dim].size() << " columns" << std::flush << "\n";
 #endif
 	
@@ -841,36 +825,37 @@ void ripser::assemble_columns_to_reduce(std::vector<diameter_index_t>& columns_t
 				columns_to_reduce.push_back(std::make_pair(diameter, index));
 #ifdef INDICATE_PROGRESS
 			if ((index + 1) % 1000000 == 0)
-				std::cout << clear_line
+				std::cout << "\033[K"
 				<< "assembled " << columns_to_reduce.size() << " out of "
-				<< filtration[dim].size() << " columns" << std::flush;
+				<< filtration[dim].size() << " columns" << std::flush
+				<< "\n";
 #endif
 		}
 	}
 	
 #ifdef INDICATE_PROGRESS
 	std::cout << "\033[K"
-	<< "sorting " << columns_to_reduce.size() << " columns" << std::flush;
+	<< "sorting " << columns_to_reduce.size() << " columns" << std::flush << "\n";
 #endif
 	
 	std::sort(columns_to_reduce.begin(), columns_to_reduce.end(),
 			  smaller_diameter_or_greater_index<diameter_index_t>());
 #ifdef INDICATE_PROGRESS
-	std::cout << clear_line;
+	std::cout << "\033[K";
 #endif
 }
 
 template <typename T> T read(std::istream& s) {
 	T result;
 	s.read(reinterpret_cast<char*>(&result), sizeof(T));
-	return result; 
+	return result; // on little endian: boost::endian::little_to_native(result);
 }
 
 void print_usage_and_exit(int exit_code) {
 	std::cerr
 	    << "Usage: "
-	    << "ripser "
-	    << "[filename] [output file] [options]" << std::endl
+	    << "infiltrator "
+	    << "[options] [filename]" << std::endl
 	    << std::endl
 	    << "Options:" << std::endl
 	    << std::endl
@@ -977,7 +962,7 @@ int main(int argc, const char* argv[]) {
 
 	double clock_start = std::clock();
 
-	ripser(std::move(filtration), n, dim_max, threshold, ratio, modulus).compute_barcodes(boundary_file);
+	infiltrator(std::move(filtration), n, dim_max, threshold, ratio, modulus).compute_barcodes(boundary_file);
 
 	boundary_file.close();
  	std::cout << "Computed persistent homology in " << (std::clock()-clock_start) / CLOCKS_PER_SEC << " s\n";
