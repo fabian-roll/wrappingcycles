@@ -3,13 +3,13 @@ ENV DEBIAN_FRONTEND noninteractive
 
 RUN apt-get update \
 && apt-get install --no-install-recommends --assume-yes --allow-downgrades \
-    curl=7.81.0-1ubuntu1.14 \
-    make=4.3-4.1build1 \
-    g++=4:11.2.0-1ubuntu1 \
-    libgudhi-dev=3.5.0+dfsg-1ubuntu2 \
+    curl \
+    make \
+    g++ \
+    libgudhi-dev \
     python3.10 \
-    python3-pandas=1.3.5+dfsg-3\
-    python3-pip=22.0.2+dfsg-1ubuntu0.4 \
+    python3-pandas \
+    python3-pip \
  && rm -rf /var/lib/apt/lists/*
 
 RUN pip3 install plyfile
