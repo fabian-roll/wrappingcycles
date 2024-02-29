@@ -1,6 +1,10 @@
 ## Wrapping Cycles in Delaunay Complexes
 
-The code in this repository can be used to produce the most persistent features of the Delaunay filtration associated to a point cloud as PLY files.
+The code in this repository can be used to produce the most persistent features of the Delaunay filtration associated to a point cloud as PLY files. It accompanies the following joint work.
+
+> Bauer, U. and Roll, F. (2023).
+> Wrapping Cycles in Delaunay Complexes: Bridging Persistent Homology and Discrete Morse Theory.
+> arXiv doi: [10.48550/arXiv.2212.02345](https://doi.org/10.48550/arXiv.2212.02345).
 
 The implementation uses the [Gudhi](https://gudhi.inria.fr) library to compute the Delaunay filtration, and a modification of the software [Infiltrator](https://github.com/Ripser/ripser/tree/filtration) to compute the totally reduced filtration boundary matrix.
 
@@ -12,4 +16,9 @@ Simply execute the command
 $ docker build -o output github.com/fabian-roll/wrappingcycles
 ```
 
-on any machine with sufficient memory and Docker installed. The output is saved to the `output/` folder in the current working directory and contains the original PLY files, as well as the three most persistent features of each 3D scan point cloud. Note that the file names contain the corresponding death/birth ratios.
+on any machine with Docker installed and configured with sufficient memory (16GB recommended). The output is saved to the `output/` folder in the current working directory and contains the original PLY files, as well as the three most persistent features of each 3D scan point cloud. Note that the file names contain the corresponding death/birth ratios.
+
+</br>
+<p align="center">
+<img src="reconstruction.png" alt="reconstruction" width="600"/>
+</p>
