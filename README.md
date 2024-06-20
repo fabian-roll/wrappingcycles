@@ -2,9 +2,8 @@
 
 The code in this repository can be used to produce the most persistent features of the Delaunay filtration associated to a point cloud as PLY files. It accompanies the following joint work.
 
-> Bauer, U. and Roll, F. (2023).
-> Wrapping Cycles in Delaunay Complexes: Bridging Persistent Homology and Discrete Morse Theory.
-> arXiv doi: [10.48550/arXiv.2212.02345](https://doi.org/10.48550/arXiv.2212.02345).
+>  Ulrich Bauer and Fabian Roll. Wrapping Cycles in Delaunay Complexes: Bridging Persistent Homology and Discrete Morse Theory. In 40th International Symposium on Computational Geometry (SoCG 2024). Leibniz International Proceedings in Informatics (LIPIcs), Volume 293, pp. 15:1-15:16, Schloss Dagstuhl – Leibniz-Zentrum für Informatik (2024)
+https://doi.org/10.4230/LIPIcs.SoCG.2024.15
 
 The implementation uses the [Gudhi](https://gudhi.inria.fr) library to compute the Delaunay filtration, and a modification of the software [Infiltrator](https://github.com/Ripser/ripser/tree/filtration) to compute the totally reduced filtration boundary matrix.
 
